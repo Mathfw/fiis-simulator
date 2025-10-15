@@ -1,0 +1,16 @@
+.font-source-sans-3 {
+  font-family: "Source Sans 3", sans-serif;
+  font-style: normal;
+}
+
+.font-fraunces {
+  font-family: "Fraunces", serif;
+  font-style: normal;
+
+}
+
+.flex-wrapper {
+  display: flex;
+  gap: var(--gap);
+}
+
