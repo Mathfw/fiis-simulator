@@ -10,28 +10,28 @@ document.querySelector('#app').innerHTML = `
   <main>
     <div class="[ card ] [ grid-flow ]">
       <h2>Simulador</h2>
-      <label class="[ text-field ] [ flex-wrapper ]">
+      <label class="[ text-field ] [ flex-flow ]">
         <span class="[ text-field__label ]">valor incial</span>
         <input type="text" id="input-inicial" placeholder="R$ 1000,00" class="[ text-field__control ]" />
       </label>
-      <label class="[ text-field ] [ flex-wrapper ]">
+      <label class="[ text-field ] [ flex-flow ]">
         <span class="[ text-field__label ]">valor mensal</span>
         <input type="text" id="input-mensal" placeholder="R$ 100,00" class="[ text-field__control ]" />
       </label>
-      <label class="[ text-field ] [ flex-wrapper ]">
+      <label class="[ text-field ] [ flex-flow ]">
         <span class="[ text-field__label ]">cota do FII</span>
         <input type="text" id="input-cota" placeholder="R$ 8,17" class="[ text-field__control ]" />
       </label>
       <label class="[ text-field ]">
         <span class="[ text-field__label ]">dividendo do fundo</span>
-        <div class="[ flex-wrapper ]">
+        <div class="[ flex-flow ]">
           <input type="text" id="input-dividendo" placeholder="12.82" class="[ text-field__control ]" />
           <span class="[ text-field__tag ]">%</span>
         </div>
       </label>
       <label class="[ text-field ]">
         <span class="[ text-field__label ]">periodo</span>
-        <div class="[ flex-wrapper ]">
+        <div class="[ flex-flow ]">
           <input type="text" id="input-periodo" placeholder="12" required class="[ text-field__control ]" />
           <span class="[ text-field__tag ]">meses</span>
         </div>
@@ -40,7 +40,7 @@ document.querySelector('#app').innerHTML = `
         calcular
       </button>
     </div>
-    <div class="[ grid-flow ]">
+    <div id="resultados" class="[ card ] [ grid-flow ]">
       <h2>Resultados</h2>
       <table>
         <!-- <caption></caption> -->
@@ -51,10 +51,10 @@ document.querySelector('#app').innerHTML = `
             <th>cotas</th>
             <th>valor</th>
             <th>sobra</th>
-            <th>cotas_dividendo_mensal</th>
-            <th>cotas_dividendo_acumulado</th>
-            <th>dividendo_mensal</th>
-            <th>dividendo_acumulado</th>
+            <th>cotas dividendo mensal</th>
+            <th>cotas dividendo acumulado</th>
+            <th>dividendo mensal</th>
+            <th>dividendo acumulado</th>
           </tr>
         </thead>
         <tbody id="tbody">
@@ -62,22 +62,23 @@ document.querySelector('#app').innerHTML = `
       </table>
     </div>
   </main>
-  <footer>
-    <p>Copyright &copy <span id="copy-date"></span> Matheus José Bento Ferreira. All Rights Reserved.</p>
-    <div>
+  <footer class="[ grid-flow place-items-center ]">
+    <div class="[ items-center flex-flow-column ]">
       <h3>contato</h3>
       <p>
         email: <a href="mailto:contato@mjbferreira.com">contato@mjbferreira.com</a>
       </p>
     </div>
+    <p>Copyright &copy <span id="copy-date"></span> Matheus José Bento Ferreira. All Rights Reserved.</p>
   </footer>
 `;
 
 document.querySelector("#copy-date").innerHTML = new Date().getFullYear();
 
-/* [ VARIAVEIS DO CALCULO ] */
+/* [ VARIAVEIS ] */
 
-let inicial = 0, mensal = 0, cota = 0, dividendo = 0, periodo = 0;
+let inicial = 100, mensal = 100, cota = 8.17, dividendo = 12, periodo = 12;
+let projecao = null;
 
 /* [ ELEMENTOS ] */
 
@@ -102,8 +103,8 @@ input_periodo.addEventListener("change", handleNumberInput)
 const button_calc = document.querySelector("#button-calc");
 button_calc.addEventListener("click", () => {
   console.log(inicial, mensal, cota, dividendo, periodo);
-  const res = calcular_projecao(inicial, mensal, cota, dividendo, periodo);
-  update_table(tbody, res);
+  projecao = calcular_projecao(inicial, mensal, cota, dividendo, periodo);
+  update_table(tbody, projecao);
 })
 
 const brFormatter = new Intl.NumberFormat('pt-BR', {
@@ -111,6 +112,9 @@ const brFormatter = new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
   minimumFractionDigits: 2
 })
+
+projecao = calcular_projecao(inicial, mensal, cota, dividendo, periodo);
+update_table(tbody, projecao);
 
 /* [ EVENT LISTENERS ] */
 
@@ -208,12 +212,14 @@ function calcular_projecao(incial, mensal, cota, dividendo, meses) {
   }
   for (let i=1; i < meses; i++) {
     result.mes.push(i+1);
-    result.investido.push(result.investido[result.investido.length -1] + mensal + result.dividendo_mensal[result.dividendo_mensal.length-1]);
+    result.investido.push(
+      result.investido[result.investido.length -1] + mensal + result.dividendo_mensal.reduce((acc, n) => acc + n)
+    );
     result.sobra.push(result.investido[result.investido.length-1] % cota);
     result.cotas.push(Math.trunc(result.investido[result.investido.length-1] / cota));
     result.valor.push(result.cotas[result.cotas.length-1] * cota);
     result.dividendo_mensal.push(result.cotas[result.cotas.length-1] * dividendo_mes);
-    result.dividendo_acumulado.push(result.cotas[result.cotas.length-1] * dividendo_mes + result.dividendo_acumulado.reduce((acc, n) => acc + n))
+    result.dividendo_acumulado.push(result.dividendo_mensal.reduce((acc, n) => acc + n))
     result.cotas_dividendo_mensal.push(result.dividendo_mensal[result.dividendo_mensal.length-1] * 100 / cota);
     result.cotas_dividendo_acumulado.push(result.dividendo_acumulado[result.dividendo_acumulado.length-1] * 100 / cota);
   }

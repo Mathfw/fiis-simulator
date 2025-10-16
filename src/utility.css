@@ -9,8 +9,23 @@
 
 }
 
-.flex-wrapper {
-  display: flex;
-  gap: var(--gap);
+.hidden {
+  display: none;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.place-items-center {
+  place-items: center;
+}
+
+.h-svh {
+  height: 100svh;
 }
 
